@@ -176,6 +176,8 @@ end
 
 function editor.limitScroll()
 	local scroll = editor.scroll 
+	local code = editor.code
+	local font = getFont()
 	scroll.x = math.max(scroll.x, 0)
 	scroll.y = math.clamp(0, scroll.y, font:getHeight('h')*#code)
 end

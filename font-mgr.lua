@@ -5,11 +5,14 @@ local fonts = {}
 local path = 'res/whitrabt.ttf'
 
 function getFont(size)
-	size = size or 20
-	if not fonts[size] then
-		fonts[size] = love.graphics.newFont(path, size)
+	if size then
+		if not fonts[size] then
+			fonts[size] = love.graphics.newFont(path, size)
+		end
+		return fonts[size]
+	else
+		return love.graphics.getFont()
 	end
-	return fonts[size]
 end
 
 local default = getFont(22)
