@@ -29,10 +29,7 @@ function console.init()
 end
 
 function console.write(...)
-	local args = {...}
-	for i=1, #args do
-		text = text .. tostring(args[i])
-	end
+	text = text .. table.concat{...}
 	
 	canvas:clear()
 	canvas:renderTo(function()

@@ -37,23 +37,28 @@ end
 function gameplay.update(dt)
 	camera.update(dt)
 	
-	if editor.enabled then editor.update(dt) return end
-	if robotPrompt.enabled then return end
+	if editor.enabled then
+		editor.update(dt)
+		return
+	end
+	
+	if robotPrompt.enabled then
+		return
+	end
 	
 	local k = love.keyboard
-	
-	local speed = 500
+	local movespeed = 500
 	if k.isDown 'a' then
-		camera.move(speed*dt, 0)
+		camera.move(movespeed*dt, 0)
 	end
 	if k.isDown 'd' then
-		camera.move(-speed*dt, 0)
+		camera.move(-movespeed*dt, 0)
 	end
 	if k.isDown 'w' then
-		camera.move(0, speed*dt)
+		camera.move(0, movespeed*dt)
 	end
 	if k.isDown 's' then
-		camera.move(0, -speed*dt)
+		camera.move(0, -movespeed*dt)
 	end
 	
 	if control then
@@ -66,37 +71,32 @@ function gameplay.update(dt)
 		if k.isDown 'o' or k.isDown 'kp+' then
 			control:up()
 		end
-		if k.isDown 'u' or k.isDown 'kp5' or k.isDown 'kp-' then
+		if k.isDown 'u' or k.isDown 'kp5' then
 			control:down()
 		end
 	end
 	
 	local m = love.mouse
 	local mx, my = m.getPosition()
-	-- needs to be done manually, so everything not hovered over is reverted
-	for i=1, #objects do
-		local obj = objects[i]
-		local rx, ry = camera.resolve(obj:screenCoords())
-		if math.dist(mx - 64, my - 64, rx, ry) < 45 then
-			obj.color = delete and {210, 100, 100} or {210, 210, 210}
+	for i=1, #robots do
+		local robot = robots[i]
+		local rx, ry = camera.resolve(robot:screenCoords())
+		rx, ry = rx + 64, ry + 64
+		if math.dist(mx, my, rx, ry) < 45 then
+			robot.showDir = robot.showDir + dt*5
+			robot.color = delete and {210, 100, 100} or {210, 210, 210}
 			if m.isDown('l','r') then
-				obj.color = delete and {210, 50, 50} or {150, 150, 150}
-			end
-			
-			if obj.type == 'robot' then
-				obj.showDir = obj.showDir + dt*5
+				robot.color = delete and {210, 50, 50} or {150, 150, 150}
 			end
 		else
-			if obj.type == 'robot' then
-				obj.showDir = obj.showDir - dt*5
-			end
-			obj.color = {255, 255, 255}
+			robot.showDir = robot.showDir - dt*5
+			robot.color = {255, 255, 255}
 		end
 		
-		if control == obj then
-			obj.nameColor = {100, 150, 255}
+		if control == robot then
+			robot.nameColor = {100, 150, 255}
 		else
-			obj.nameColor = {255, 255, 255}
+			robot.nameColor = {255, 255, 255}
 		end
 	end
 	
@@ -179,7 +179,7 @@ function gameplay.mousepressed(x, y, b)
 		console.scroll = console.scroll - 22
 	end
 	
-	local robot = robots.nearest(x, y, 23*screenScale)
+	local robot = robots.nearest(x, y, 45)
 	local shift = love.keyboard.isDown('lshift','rshift')
 	local alt = love.keyboard.isDown('lalt','ralt')
 	
@@ -188,19 +188,15 @@ function gameplay.mousepressed(x, y, b)
 			if b == 'l' then
 				if shift then
 					control = robot
-					return
 				else
 					robot:exec()
-					return
 				end
 			elseif b == 'r' then
 				editor.enable(robot)
-				return
 			end
 		else
 			if b == 'l' then
 				robots.remove(robot)
-				return
 			elseif b == 'r' then
 				-- make a backup before erasing
 				local fs = love.filesystem
@@ -213,7 +209,6 @@ function gameplay.mousepressed(x, y, b)
 					fs.write(robot:saveDir()..'/code', '')
 					robot.code = {''}
 				end
-				return
 			end
 		end
 	else
@@ -242,18 +237,15 @@ function gameplay.draw()
 		-(math.floor(y / (h*2)) + 1) * h
 	)
 	
-	-- draw the shadows to make z position clearer
-	objects.shadows()
-	
-	-- draw ALL THE THINGS
-	objects.draw()
+	-- draw every object
+	robots.draw()
 	
 	-- and ends everything that is of the game
 	-- start the GUIs!
 	g.pop()
 	
-	-- draw the names and such for robots
-	robots.gui()
+	-- draw them robonames
+	robots.names()
 	
 	-- draw that one window that lets you make a new robot
 	if robotPrompt.enabled then

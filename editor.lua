@@ -102,14 +102,12 @@ function editor.keypressed(k, uni)
 			editor.target:saveCode()
 			editor.target:exec()
 		else
-			local whitespace = line:match('^%s*')
 			if cursor.x > 0 then
-				code[cursor.y] = left
+				local whitespace = line:match('^%s*')
 				cursor.y = cursor.y + 1
-				table.insert(code, cursor.y, whitespace..right)
-				cursor.x = #whitespace
-			else
 				table.insert(code, cursor.y, whitespace)
+			else
+				table.insert(code, cursor.y, '')
 				cursor.y = cursor.y + 1
 			end
 		end
@@ -159,8 +157,9 @@ function editor.keypressed(k, uni)
 		scroll.x = scroll.x - cw
 	end
 	
+	scroll.x = math.max(scroll.x, 0)
+	scroll.y = math.clamp(0, scroll.y, font:getHeight('h')*#code)
 	editor.cursorBlink = 0
-	editor.limitScroll()
 end
 
 function editor.mousepressed(x, y, b)
@@ -171,15 +170,6 @@ function editor.mousepressed(x, y, b)
 	elseif b == 'wd' then
 		editor.scroll.y = scroll.y + lineheight
 	end
-	editor.limitScroll()
-end
-
-function editor.limitScroll()
-	local scroll = editor.scroll 
-	local code = editor.code
-	local font = getFont()
-	scroll.x = math.max(scroll.x, 0)
-	scroll.y = math.clamp(0, scroll.y, font:getHeight('h')*#code)
 end
 
 return editor

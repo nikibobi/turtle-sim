@@ -23,8 +23,6 @@ function setState(state, ...)
 end
 
 function love.load()
-	local _
-	
 	love.graphics.setCaption('TurtleSim by Kingdaro')
 	love.graphics.setDefaultImageFilter('linear', 'nearest')
 	love.filesystem.setIdentity('TurtleSim')
@@ -32,7 +30,7 @@ function love.load()
 	_=				require 'lib.math'
 	tween = 		require 'lib.tween'
 	timer = 		require 'lib.hump.timer'
-	moonscript =	require 'lib.moonscript'
+--	moonscript =	require 'lib.moonscript'
 	
 	_=				require 'image-loader'
 --	_=				require 'keypressed'
@@ -45,13 +43,10 @@ function love.load()
 	objects =		require 'objects'
 	robots = 		require 'robots'
 	robotapi = 		require 'robotapi'
-	blocks =		require 'blocks'
 	gameplay = 		require 'gameplay'
 	editor = 		require 'editor'
 	
 	loadImages('img/')
-	objects.init()
-	robots.init()
 	console.init()
 	setState(gameplay)
 end
